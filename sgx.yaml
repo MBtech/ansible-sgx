@@ -1,0 +1,57 @@
+---
+- name: Setup SGX-Driver and SGX
+  hosts: sgx-nodes
+  tasks:
+  - name: Create base directory
+    file:
+      path: "{{ base_path }}"
+      state: directory
+      owner: "{{ user }}"
+      recurse: yes
+    become: true
+
+  - name: Install dependencies
+    action: apt pkg="{{ item }}" state=installed
+    with_items:
+       - build-essential
+       - ocaml
+       - automake
+       - autoconf
+       - libtool
+       - wget
+       - python2.7
+       - libssl-dev
+       - libcurl4-openssl-dev
+       - protobuf-compiler
+       - libprotobuf-dev
+       - git
+    become: true
+
+  - name: Set python to python 2.7
+    alternatives:
+      name: python
+      link: /usr/bin/python
+      path: /usr/bin/python2.7
+      priority: 10  
+    become: true
+  
+  - name: clone SGX-Driver
+    git: 
+      repo: https://github.com/01org/linux-sgx-driver.git
+      dest: "{{ base_path }}/linux-sgx-driver/"
+ 
+  - name: install SGX-Driver
+    script: install-driver.sh
+    args:
+      chdir: "{{ base_path }}/linux-sgx-driver/"
+
+  - name: clone Intel SGX SDK and PSW
+    git:
+      repo: https://github.com/01org/linux-sgx.git
+      dest: "{{ base_path }}/linux-sgx/"
+
+  - name: install SGX SDK and PSW
+    script: install-sgx.sh {{ base_path }}/{{ sdk_path }}
+    args:
+      chdir: "{{ base_path }}/linux-sgx/"
+        
