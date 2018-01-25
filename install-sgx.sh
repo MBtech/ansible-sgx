@@ -23,3 +23,4 @@ sudo /opt/intel/sgxpsw/uninstall.sh
 
 sudo ./sgx_linux_x64_psw_*.bin
 
+ln -s $1/sgxsdk /opt/intel/sgxsdk
