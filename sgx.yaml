@@ -39,9 +39,16 @@
     git: 
       repo: https://github.com/01org/linux-sgx-driver.git
       dest: "{{ base_path }}/linux-sgx-driver/"
+      force: yes
  
+  - name: Copy script Driver
+    copy:
+      src: install-driver.sh
+      dest: "{{ base_path }}/linux-sgx-driver/"
+      mode: 0777
+
   - name: install SGX-Driver
-    script: install-driver.sh
+    shell: ./install-driver.sh
     args:
       chdir: "{{ base_path }}/linux-sgx-driver/"
 
@@ -49,9 +56,38 @@
     git:
       repo: https://github.com/01org/linux-sgx.git
       dest: "{{ base_path }}/linux-sgx/"
+      force: yes
+
+  - name: Copy script SDK
+    copy:
+      src: install-sgx.sh
+      dest: "{{ base_path }}/linux-sgx/"
+      mode: 0777
 
   - name: install SGX SDK and PSW
-    script: install-sgx.sh {{ base_path }}/{{ sdk_path }}
+    shell: ./install-sgx.sh {{ base_path }}/{{ sdk_path }}
     args:
       chdir: "{{ base_path }}/linux-sgx/"
+  
+  - name: Prep for git-lfs
+    shell: curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+ 
+  - name: Install git-lfs 
+    apt:
+       name: git-lfs
+       state: present 
+    
+  - name: git lfs install
+    shell: git lfs install
+
+  - name: Setup Minotaur
+    git:
+      repo: https://github.com/MBtech/Minotaur.git
+      dest: "{{ base_path }}/Minotaur"
+
+  - name: Solve dependencies of Minotaur
+    shell: ./setup.sh
+    args:
+      chdir: "{{ base_path }}/Minotaur/"
+  
         
